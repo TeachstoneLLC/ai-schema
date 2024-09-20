@@ -39,3 +39,7 @@ fi
 
 # First, establish the new service role of svc_ai
 psql -U $PGUSER -d $PGDATABASE -c "CREATE ROLE svc_ai WITH LOGIN PASSWORD '$SVC_PASSWORD';"
+
+psql -U $PGUSER -d $PGDATABASE -c "GRANT all on database $PGDATABASE TO svc_ai;"
+
+psql -U $PGUSER -d $PGDATABASE -c "GRANT all on schema public TO svc_ai;"
