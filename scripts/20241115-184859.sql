@@ -1,0 +1,1 @@
+create table job_metrics (id int, user_guid int, job_id int, metric varchar, metric_value_int int);
