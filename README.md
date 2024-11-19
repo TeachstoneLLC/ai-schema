@@ -109,4 +109,56 @@ the default choices about:
 
 ### Common design patterns and choices
 
-[ still to come ]
+**Enum tables.** In many cases it is useful to have a column in a table that denotes some enumerable value, and it would be helpful
+to users of that table (e.g. in reporting) to be able to read the value as plain English. Consider a `pets` table that lists
+the pets of various people. In the U.S., people commonly own dogs and cats, but it's not uncommon to see rabbits as pets, and
+occasionally there are more "exotic" pet types:
+
+```
+pets
+--------------------------------------------
+| id | animal_type | name                  |
++----+-------------+-----------------------+
+|  1 | DOG         | Fido                  |
+|  2 | CAT         | Snowball              |
+|  3 | DOG         | Santa's Little Helper |
+|  4 | SPIDER      | Charlotte             |
+|  5 | PIG         | Wilbur                |
+|  6 | CAT         | Dinah                 |
++----+-------------+-----------------------+
+select animal_type, count(*) from pets group by animal_type;
+
+animal_type | COUNT(*)
+------------+---------+
+DOG         |       2 |
+CAT         |       2 |
+SPIDER      |       1 |
+PIG         |       1 |
+------------+---------+
+```
+
+Leaving `animal_type` as a string type simplifies reporting, as there is no need to join to a table 
+listing the types of animals in order to see results in plain English. However, this leaves open the 
+possibility of typos:
+```
+insert into pets (animal_type, name) values ('SPYDER', 'Shelob');
+```
+
+To enforce referential integrity and constrain the values that `animal_types` may take on, it's useful
+to declare an enum table consisting of a `key` and optionally a `description` column, and use the key as
+a foreign key in the `pets` table:
+
+```
+create table animal_types (
+    key varchar(32) NOT NULL PRIMARY KEY,
+    description varchar NOT NULL
+);
+create table pets (
+    id SERIAL PRIMARY KEY,
+    animal_type varchar(32) NOT NULL REFERENCES animal_types(key),
+    name varchar(500) NOT NULL
+);
+```
+
+Such tables are useful for values that will wind up enumerated in the back-end service that reads the data
+(as a Java `Enum` or in Ruby as class property).
