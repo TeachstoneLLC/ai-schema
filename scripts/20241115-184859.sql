@@ -1,9 +1,6 @@
-CREATE TABLE metric_names (
-    key varchar(32) PRIMARY KEY,     
-    description varchar NOT NULL,
-    name varchar(32) NOT NULL,  
-    UNIQUE(name)                
+CREATE TABLE metric_names ( 
+    name varchar(32) PRIMARY KEY NOT NULL,
+    description varchar NOT NULL,             
 );
 
-comment on column metric_names.key IS 'The unique identifier for the metric.';
-comment on column metric_names.description IS 'A brief description of what the metric represents.';
+comment on table metric_names is 'Stores the unique key and description for metrics.';
