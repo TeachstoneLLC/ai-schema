@@ -91,7 +91,7 @@ the default choices about:
     - `comment on column accounts.name is 'The name of the account';`
 
 9. Please make your comments useful, with an eye toward eliminating ambiguity:
-    - `comment on column job_histories.processing_end_time is 'UTC timestamp at which step processing ended; this is null for steps that haven't finished processing yet.';`
+    - `comment on column job_histories.processing_end_time is 'UTC timestamp at which step processing ended; this is null for steps that haven''t finished processing yet.';`
 
 10. Certain very common columns always mean the same thing, and do not require comments:
     - `id` - the sequential integer ID (starting at 1) for the primary key of a table
