@@ -162,3 +162,47 @@ create table pets (
 
 Such tables are useful for values that will wind up enumerated in the back-end service that reads the data
 (as a Java `Enum` or in Ruby as class property).
+
+**Timestamp fields.** For major entities it can be useful to include timestamp fields which will indicate
+when a record was created, updated, or marked for deletion. When using any one of these, all three should 
+be included. They are:
+* `created_at` – the UTC timestamp at which the record was inserted
+* `updated_at` – the UTC timestamp at which the record was most recently updated
+* `deleted_at` – if present, the UTC timestamp at which the record was marked as deleted
+
+They can be included in a table definition as follows:
+```
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL default now(),
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL default now(),
+    deleted_at TIMESTAMP WITHOUT TIME ZONE
+```
+These fields do not require comments. A function is provided to automatically update the `updated_at` field
+in cases where the record is modified by any database client besides the service that typically maintains the data.
+Install it as follows:
+```
+    CREATE TRIGGER <table_name>_update_trigger BEFORE UPDATE ON <table_name> FOR EACH ROW EXECUTE PROCEDURE updated_at_timestamp();
+```
+
+When defining unique indexes on such tables, it is often useful to use a partial index that excludes deleted records:
+```
+    CREATE UNIQUE INDEX idx_job_files_name ON job_files (s3_bucket, s3_key) WHERE deleted_at is NULL;
+```
+
+**Primary and Alternate Keys.** The vast majority of tables will have a simple `id` column as the primary key (see **Enum Tables** above for an exception), defined as
+`id SERIAL PRIMARY KEY`, regardless of whether there is another logical choice for primary key. Having a sequential 
+integer as the primary key is a convenience and simplifies model/entity code in the applications that make
+use of the data.
+
+However, it's not a good idea for sequential internal identifiers to leak out into the external world, so very
+often additional alternate keys should be supplied:
+* `uuid` – `uuid UUID NOT NULL default gen_random_uuid()` – this provides a unique and non-sequential key that
+           can be shared with external parties
+* `slug` – `slug varchar(80) NOT NULL` – Should start with a lower-case letter and can include lower-case letters, numbers, 
+           and hyphens. A slug is expected to be unique on the table and can be used in URLs to identify a record 
+           using plain English words (useful for Search Engine Optimization or SEO).
+
+PostgreSQL will add unqiue indexes automatically to a primary key, but it will not apply indexes to alternate unique keys, 
+so be sure to provide them:
+```
+    CREATE UNIQUE INDEX idx_job_files_uuid ON job_files (uuid);
+```
