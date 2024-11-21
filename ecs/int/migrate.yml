@@ -1,0 +1,10 @@
+containerDefinitions:
+  - name: primary
+    image: 531046516314.dkr.ecr.us-east-1.amazonaws.com/ai-schema-migrations
+    essential: true
+    environment:
+      - name: PROJECT_ENV
+        value: "int"
+      - name: NEW_RELIC_APP_NAME
+        value: "ai-schema-migrations_int"
+        

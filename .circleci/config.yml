@@ -78,3 +78,26 @@ workflows:
           requires:
             - Build Schema migration image
 
+  ecs_deploy:
+    jobs:
+      - teachstone/ecr_promote_image:
+          name: Promote Migration Image
+          repo-name: ai-schema
+          context: aws-ecr-ai-schema
+          slack_channel: << pipeline.parameters.slack-alerts-int-epic >>
+          <<: *all_tags
+
+      - teachstone/deploy_started:
+          <<: *deploy_int
+          slack_channel: << pipeline.parameters.slack-deployments-int-epic >>
+      - teachstone/update_and_run_task:
+          <<: *deploy_int
+          name: Migrate Int
+          task_name: ai-schema-migrations
+          ecr_repo: ai-schema-migrations
+          overlay_files: ecs/int/migrate.yml
+          slack_channel: << pipeline.parameters.slack-alerts-int-epic >>
+          requires:
+            - Promote Migration Image
+
+
