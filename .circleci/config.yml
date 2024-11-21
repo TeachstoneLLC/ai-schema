@@ -82,7 +82,7 @@ workflows:
     jobs:
       - teachstone/ecr_promote_image:
           name: Promote Migration Image
-          repo_name: ai-schema
+          repo_name: ai-schema-migrations
           context: aws-ecr-ai-schema
           slack_channel: << pipeline.parameters.slack-alerts-int-epic >>
           <<: *all_tags
