@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+set -e
+
+# space deliminated environments
+deploy_environments="int epic qat production"
+
+fail () {
+  echo "FATAL: $1"
+  exit 1
+}
+
+print_usage () {
+  echo "USAGE: deploy [env]"
+  echo "env must be one of: ${deploy_environments}"
+}
+
+if [[ -z "$1" ]] ; then
+  print_usage
+  fail "No arguments supplied"
+fi
+
+if [[ ! "$deploy_environments" =~ (" "|^)$1(" "|$) ]] ; then
+  print_usage
+  fail "$1 is not in $deploy_environments"
+fi
+tag_name="$1-v`TZ='UTC' date +%Y%m%d%H%M`"
+git_sha=`git rev-parse --short HEAD`
+
+echo "Creating tag ${tag_name} for git SHA ${git_sha} to trigger deploy to the $1 environment"
+echo -n "Are you sure you want to continue? (only yes accepted, anything else to quit): "
+read _PROCEED
+
+if [ "$_PROCEED" != "yes" ]; then
+    echo "Stopping, no actions performed"
+    exit 1
+else
+    echo "Proceeding deploying git sha ${git_sha} to ${1}"
+fi
+
+git tag ${tag_name}
+git push origin "refs/tags/${tag_name}"
+
