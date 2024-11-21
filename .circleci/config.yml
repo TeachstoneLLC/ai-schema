@@ -62,6 +62,7 @@ migration_image: &migration_image
   no_output_timeout: 20m
   context: aws-ecr-ai-schema
   dockerfile: Dockerfile
+  repo_name: ai-schema-migrations
 
 workflows:
   ci:
