@@ -7,4 +7,3 @@ containerDefinitions:
         value: "int"
       - name: NEW_RELIC_APP_NAME
         value: "ai-schema-migrations_int"
-        
