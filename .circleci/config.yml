@@ -2,30 +2,78 @@
 # See: https://circleci.com/docs/configuration-reference
 version: 2.1
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/jobs-steps/#jobs-overview & https://circleci.com/docs/configuration-reference/#jobs
-jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/executor-intro/ & https://circleci.com/docs/configuration-reference/#executor-job
-    docker:
-      # Specify the version you desire here
-      # See: https://circleci.com/developer/images/image/cimg/base
-      - image: cimg/base:current
+parameters:
+  slack-deployments-int-epic:
+    type: string
+    default: "C07PL6DM9GR"
+  slack-alerts-int-epic:
+    type: string
+    default: "C0642EJ2HP1"
+  slack-deployments-qat:
+    type: string
+    default: "C07PW9U4K0Q"
+  slack-alerts-qat:
+    type: string
+    default: "C064KG1F5QC"
+  slack-deployments-production:
+    type: string
+    default: "C07P7D88RB5"
+  slack-alerts-production:
+    type: string
+    default: "C07NSUHEN95"
 
-    # Add steps to the job
-    # See: https://circleci.com/docs/jobs-steps/#steps-overview & https://circleci.com/docs/configuration-reference/#steps
-    steps:
-      # Checkout the code as the first step.
-      - checkout
-      - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+orbs:
+  aws-cli: circleci/aws-cli@4.1.3
+  teachstone: teachstonellc/ci@1.1
 
-# Orchestrate jobs using workflows
-# See: https://circleci.com/docs/workflows/ & https://circleci.com/docs/configuration-reference/#workflows
+ci_only: &ci_only
+  filters:
+    branches:
+      only: /.*/
+    tags:
+      ignore: /.*/
+
+main: &main
+  filters:
+    branches:
+      only:
+        - main
+    tags:
+      ignore: /.*/
+
+all_tags: &all_tags
+  filters:
+    branches:
+      ignore: /.*/
+    tags:
+      only: /.*/
+
+deploy_int: &deploy_int
+  context: aws-deploy-ai-schema-int
+  filters:
+    tags:
+      only: /int-.*/
+    branches:
+      ignore:
+        - /.*/
+
+migration_image: &migration_image
+  resource_class: xlarge
+  no_output_timeout: 20m
+  context: aws-ecr-ai-schema
+  dockerfile: Dockerfile
+
 workflows:
-  say-hello-workflow: # This is the name of the workflow, feel free to change it to better match your workflow.
-    # Inside the workflow, you define the jobs you want to run.
+  ci:
     jobs:
-      - say-hello
+      - teachstone/ecr_push_image:
+          name: Build Schema migration image
+          <<: *migration_image
+          slack_channel: << pipeline.parameters.slack-alerts-int-epic >>
+      - teachstone/create_git_tag:
+          <<: *main
+          env_name: int
+          context: git-credentials
+          requires:
+            - Build Schema migration image
+
