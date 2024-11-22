@@ -24,4 +24,4 @@ RUN chown -R teachstone:teachstone $APP_HOME
 USER teachstone
 # Note we are using the Shell form of ENTRYPOINT to allow for environment variable substitution
 #ENTRYPOINT sem-apply --url postgresql://$PGUSER@$PGHOST:$PGPORT/$PGDATABASE
-ENTRYPOINT echo "hello, it's $(date)"
+ENTRYPOINT echo "hello, $(env)"
