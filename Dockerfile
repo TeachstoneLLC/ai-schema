@@ -1,11 +1,5 @@
 FROM ruby:3.1.4
 
-#ENV PGUSER=svc_ai
-#ENV PGHOST=host.docker.internal
-#ENV PGPORT=5432
-#ENV PGDATABASE=ai_development
-#ENV PGPASSWORD=password
-
 RUN gem install schema-evolution-manager
 
 RUN  apt-get update -qq && apt-get upgrade -qq --no-install-recommends  \
