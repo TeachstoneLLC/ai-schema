@@ -1,0 +1,103 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/configuration-reference
+version: 2.1
+
+parameters:
+  slack-deployments-int-epic:
+    type: string
+    default: "C07PL6DM9GR"
+  slack-alerts-int-epic:
+    type: string
+    default: "C0642EJ2HP1"
+  slack-deployments-qat:
+    type: string
+    default: "C07PW9U4K0Q"
+  slack-alerts-qat:
+    type: string
+    default: "C064KG1F5QC"
+  slack-deployments-production:
+    type: string
+    default: "C07P7D88RB5"
+  slack-alerts-production:
+    type: string
+    default: "C07NSUHEN95"
+
+orbs:
+  aws-cli: circleci/aws-cli@4.1.3
+  teachstone: teachstonellc/ci@1.1
+
+ci_only: &ci_only
+  filters:
+    branches:
+      only: /.*/
+    tags:
+      ignore: /.*/
+
+main: &main
+  filters:
+    branches:
+      only:
+        - main
+    tags:
+      ignore: /.*/
+
+all_tags: &all_tags
+  filters:
+    branches:
+      ignore: /.*/
+    tags:
+      only: /.*/
+
+deploy_int: &deploy_int
+  context: aws-deploy-ai-schema-int
+  filters:
+    tags:
+      only: /int-.*/
+    branches:
+      ignore:
+        - /.*/
+
+migration_image: &migration_image
+  resource_class: xlarge
+  no_output_timeout: 20m
+  context: aws-ecr-ai-schema
+  dockerfile: Dockerfile
+  repo_name: ai-schema-migrations
+
+workflows:
+  ci:
+    jobs:
+      - teachstone/ecr_push_image:
+          name: Build Schema migration image
+          <<: *migration_image
+          slack_channel: << pipeline.parameters.slack-alerts-int-epic >>
+      - teachstone/create_git_tag:
+          <<: *main
+          env_name: int
+          context: git-credentials
+          requires:
+            - Build Schema migration image
+
+  ecs_deploy:
+    jobs:
+      - teachstone/ecr_promote_image:
+          name: Promote Migration Image
+          repo_name: ai-schema-migrations
+          context: aws-ecr-ai-schema
+          slack_channel: << pipeline.parameters.slack-alerts-int-epic >>
+          <<: *all_tags
+
+      - teachstone/deploy_started:
+          <<: *deploy_int
+          slack_channel: << pipeline.parameters.slack-deployments-int-epic >>
+      - teachstone/update_and_run_task:
+          <<: *deploy_int
+          name: Migrate Int
+          task_name: ai-schema-migrations
+          ecr_repo_name: ai-schema-migrations
+          overlay_files: ecs/int/migrate.yml
+          slack_channel: << pipeline.parameters.slack-alerts-int-epic >>
+          requires:
+            - Promote Migration Image
+
+

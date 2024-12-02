@@ -1,0 +1,22 @@
+containerDefinitions:
+  - name: primary
+    image: 531046516314.dkr.ecr.us-east-1.amazonaws.com/ai-schema-migrations
+    essential: true
+    environment:
+      - name: PROJECT_ENV
+        value: "int"
+      - name: NEW_RELIC_APP_NAME
+        value: "ai-schema-migrations_int"
+    secrets:
+      - name: NEW_RELIC_LICENSE_KEY
+        valueFrom: "arn:aws:secretsmanager:us-east-1:531046516314:secret:/v1/internal/eng/vendor/new_relic/license/app_key-gTswnR:key::"
+      - name: PGUSER
+        valueFrom: "arn:aws:ssm:us-east-1:376525031798:parameter/v1/internal/int/ts/ai-schema/pgsql/username"
+      - name: PGHOST
+        valueFrom: "arn:aws:ssm:us-east-1:376525031798:parameter/v1/internal/int/ts/ai-schema/pgsql/host"
+      - name: PGPORT
+        valueFrom: "arn:aws:ssm:us-east-1:376525031798:parameter/v1/internal/int/ts/ai-schema/pgsql/port"
+      - name: PGDATABASE
+        valueFrom: "arn:aws:ssm:us-east-1:376525031798:parameter/v1/internal/int/ts/ai-schema/pgsql/database"
+      - name: PGPASSWORD
+        valueFrom: "arn:aws:ssm:us-east-1:376525031798:parameter/v1/internal/int/ts/ai-schema/pgsql/password"
