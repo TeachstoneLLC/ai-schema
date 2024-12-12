@@ -1,3 +1,4 @@
+/* Using BEGIN and COMMIT to bundle these as a single transaction */
 BEGIN;
 
 UPDATE job_steps
