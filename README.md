@@ -12,11 +12,11 @@ the [laptop setup script](https://github.com/TeachstoneLLC/tools/) will do this 
 
 Run the init script to set up a role in the development database:
 
-    SVC_PASS=some_password ./init.sh
+    SVC_PASSWORD=some_password ./init.sh
 
 and again to set up the test database:
 
-    PGDATABASE=ai_test SVC_PASS=some_password ./init.sh
+    PGDATABASE=ai_test SVC_PASSWORD=some_password ./init.sh
 
 You'll get an error this time complaining `ERROR:  role "svc_ai" already exists` – ignore it.
 
