@@ -4,7 +4,7 @@
 
     <groupId>com.teachstone</groupId>
     <artifactId>ai-schema</artifactId>
-    <version>0.0.6-SNAPSHOT</version>
+    <version>0.0.6</version>
     <packaging>pom</packaging>
 
     <repositories>
