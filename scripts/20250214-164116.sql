@@ -1,1 +1,1 @@
-INSERT INTO pipelines (key, description) VALUES ('CODER_GPT3_O_MINI_ASSISTANT_V0.2', 'Using Assistant V0.2 with GPT o3-mini');
+INSERT INTO pipelines (key, description) VALUES ('CODER_GPT3_O_MINI_ASSISTANT_V0_2', 'Using Assistant V0.2 with GPT o3-mini');
